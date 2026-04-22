@@ -1,56 +1,63 @@
 <h1>German Learning App</h1>
 <p>Score: {{ score }} / {{ total }}</p>
 
+<hr />
+
+<!-- 🔄 Loading -->
 <div *ngIf="loading">
   <p>Loading word...</p>
 </div>
 
 <div *ngIf="!loading && word">
+
   <h2>German → English</h2>
 
-  <p><b>German:</b> {{ word.german }}</p>
+  <p><b>{{ word.german }}</b></p>
 
   <input [(ngModel)]="userAnswer" placeholder="Type English word" />
   <button (click)="checkAnswer()">Check</button>
 
   <p *ngIf="result">{{ result }}</p>
+  <p *ngIf="result"><b>Answer:</b> {{ word.english }}</p>
 
-  <p *ngIf="result">
-    <b>Answer:</b> {{ word.english }}
-  </p>
-
-  <button (click)="loadWord()">Next Word</button>
-</div>
-
-<hr />
+  <hr />
 
 
-<div *ngIf="!loading && word">
   <h2>English → German</h2>
 
-  <p><b>English:</b> {{ word.english }}</p>
+  <p><b>{{ word.english }}</b></p>
 
   <input [(ngModel)]="userAnswerGerman" placeholder="Type German word" />
   <button (click)="checkGermanAnswer()">Check</button>
 
   <p *ngIf="resultGerman">{{ resultGerman }}</p>
+  <p *ngIf="resultGerman"><b>Answer:</b> {{ word.german }}</p>
 
-  <p *ngIf="resultGerman">
-    <b>Answer:</b> {{ word.german }}
-  </p>
+  <hr />
+
+
+  <h2>Fill Missing Letters</h2>
+
+  <div style="font-size: 24px; letter-spacing: 10px; margin-bottom: 10px;">
+    <span *ngFor="let letter of displayWord; let i = index">
+
+      <input *ngIf="letter === '_'"
+             maxlength="1"
+             [(ngModel)]="userInputs[i]"
+             style="width:35px;text-align:center;font-size:20px;" />
+
+      <span *ngIf="letter !== '_'">
+        {{ letter }}
+      </span>
+
+    </span>
+  </div>
+
+  <button (click)="checkPuzzle()">Check Puzzle</button>
+
+  <hr />
+
+
+  <button (click)="loadWord()">Next Word</button>
+
 </div>
-
-<div>
-  <span *ngFor="let letter of displayWord; let i = index">
-    
-    <input *ngIf="letter === '_'"
-           maxlength="1"
-           [(ngModel)]="userInputs[i]"
-           style="width:30px;text-align:center;" />
-
-    <span *ngIf="letter !== '_'">{{ letter }}</span>
-
-  </span>
-</div>
-
-<button (click)="checkAnswers()">Check</button>
