@@ -1,8 +1,33 @@
-<hr />
+<h1>German Learning App</h1>
+<p>Score: {{ score }} / {{ total }}</p>
 
-<h2>English → German</h2>
+<div *ngIf="loading">
+  <p>Loading word...</p>
+</div>
 
 <div *ngIf="!loading && word">
+  <h2>German → English</h2>
+
+  <p><b>German:</b> {{ word.german }}</p>
+
+  <input [(ngModel)]="userAnswer" placeholder="Type English word" />
+  <button (click)="checkAnswer()">Check</button>
+
+  <p *ngIf="result">{{ result }}</p>
+
+  <p *ngIf="result">
+    <b>Answer:</b> {{ word.english }}
+  </p>
+
+  <button (click)="loadWord()">Next Word</button>
+</div>
+
+<hr />
+
+
+<div *ngIf="!loading && word">
+  <h2>English → German</h2>
+
   <p><b>English:</b> {{ word.english }}</p>
 
   <input [(ngModel)]="userAnswerGerman" placeholder="Type German word" />
