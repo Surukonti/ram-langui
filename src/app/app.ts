@@ -30,6 +30,9 @@ import { environment } from '../environments/environment';
   `
 })
 export class App {
+  userAnswerGerman: string = '';
+resultGerman: string = '';
+  
   loading: boolean = false;
   score: number = 0;
 total: number = 0;
@@ -41,7 +44,22 @@ total: number = 0;
   constructor(private http: HttpClient, private cd: ChangeDetectorRef) {
     this.loadWord();
   }
+  checkGermanAnswer() {
+  if (!this.word) return;
+
+  if (
+    this.userAnswerGerman.trim().toLowerCase() ===
+    this.word.german.toLowerCase()
+  ) {
+    this.resultGerman = "✅ Correct!";
+  } else {
+    this.resultGerman = "❌ Wrong!";
+  }
+} 
+
 loadWord() {
+  this.userAnswerGerman = '';
+this.resultGerman = '';
   this.loading = true;
 
   this.http.get(`${environment.apiUrl}/api/word/random`)
