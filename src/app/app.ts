@@ -39,27 +39,34 @@ mode: 'german' | 'english' | 'puzzle' = 'german';
   loadWord() {
     this.loading = true;
 
-    this.http.get(`${environment.apiUrl}/api/word/random`)
-      .subscribe((data: any) => {
+  this.http.get(`${environment.apiUrl}/api/word/random`)
+  .subscribe({
+    next: (data: any) => {
 
-        this.word = data;
+      this.word = data;
 
-        this.originalWord = data.german.toUpperCase();
+      this.originalWord = data.german.toUpperCase();
 
-        this.generatePuzzle();
+      this.generatePuzzle();
 
-        // reset inputs
-        this.userInputs = new Array(this.originalWord.length).fill('');
+      this.userInputs = new Array(this.originalWord.length).fill('');
 
-        this.userAnswer = '';
-        this.result = '';
+      this.userAnswer = '';
+      this.result = '';
 
-        this.userAnswerGerman = '';
-        this.resultGerman = '';
+      this.userAnswerGerman = '';
+      this.resultGerman = '';
 
-        this.loading = false;
-        this.cd.detectChanges();
-      });
+      this.loading = false;
+      this.cd.detectChanges();
+    },
+
+    error: (error) => {
+      console.error('Error loading word:', error);
+      this.loading = false;
+      this.result = 'Failed to load word.';
+    }
+  });
   }
 
   checkAnswer() {
