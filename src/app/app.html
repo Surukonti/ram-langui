@@ -203,22 +203,7 @@
   🔊 Listen
 </button>
 
-      <p style="font-size: 18px; margin: 8px;">
-     <strong>{{ getSelectedLanguageName() }}:</strong>
-{{ getWordTranslation() }}
-      </p>
-
-      <p style="margin: 8px;">
-
-        <b>{{ t('wordLevel') }}:</b>
-        {{ word.level }}
-
-        &nbsp; | &nbsp;
-
-        <b>{{ t('wordType') }}:</b>
-        {{ word.partOfSpeech }}
-
-      </p>
+    
 
     </div>
 
@@ -396,6 +381,22 @@
 
     </div>
 
+      <p style="font-size: 18px; margin: 8px;">
+     <strong>{{ getSelectedLanguageName() }}:</strong>
+       {{ getWordTranslation() }}
+      </p>
+
+      <p style="margin: 8px;">
+
+        <b>{{ t('wordLevel') }}:</b>
+        {{ word.level }}
+
+        &nbsp; | &nbsp;
+
+        <b>{{ t('wordType') }}:</b>
+        {{ word.partOfSpeech }}
+
+      </p>
 
     <!-- Next word -->
     <div style="
