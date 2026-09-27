@@ -30,10 +30,9 @@
 
         <option
           *ngFor="let language of languages"
-          [value]="language.code">
-
+          [value]="language.code"
+        >
           {{ language.name }}
-
         </option>
 
       </select>
@@ -100,6 +99,26 @@
     margin-bottom: 20px;
   ">
 
+    <!-- Vocabulary -->
+   <button
+  (click)="mode='vocabulary'"
+  style="
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    cursor: pointer;
+  "
+>
+  {{ uiLanguage === 'de' ? 'Deutscher Wortschatz' :
+     uiLanguage === 'ar' ? 'المفردات الألمانية' :
+     uiLanguage === 'uk' ? 'Німецька лексика' :
+     uiLanguage === 'ru' ? 'Немецкая лексика' :
+     uiLanguage === 'tr' ? 'Almanca Kelime Bilgisi' :
+     'German Vocabulary' }}
+</button>
+
+
+    <!-- German → English -->
     <button
       (click)="mode='german'"
       style="
@@ -112,6 +131,8 @@
       {{ t('germanEnglish') }}
     </button>
 
+
+    <!-- English → German -->
     <button
       (click)="mode='english'"
       style="
@@ -124,6 +145,8 @@
       {{ t('englishGerman') }}
     </button>
 
+
+    <!-- Puzzle -->
     <button
       (click)="mode='puzzle'"
       style="
@@ -166,86 +189,178 @@
   </div>
 
 
-  <!-- Word area -->
+  <!-- ================================================= -->
+  <!-- WORD AREA -->
+  <!-- ================================================= -->
+
   <div *ngIf="!loading && word">
 
 
-    <!-- Word card -->
-    <div style="
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 25px;
-      text-align: center;
-    ">
+    <!-- ================================================= -->
+    <!-- 1. GERMAN VOCABULARY -->
+    <!-- ================================================= -->
 
-<h2 style="
-  font-size: 34px;
-  margin: 0 0 15px 0;
-">
+    <div
+      *ngIf="mode === 'vocabulary'"
+      style="
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+      "
+    >
 
-  {{ word.article ? word.article + ' ' : '' }}
-  {{ word.german }}
+      <h2 style="
+        font-size: 34px;
+        margin: 0 0 12px 0;
+      ">
 
-</h2>
+        {{ word.article ? word.article + ' ' : '' }}
+        {{ word.german }}
 
-<button
-  type="button"
-  (click)="speakGerman()"
-  style="
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
-    cursor: pointer;
-    margin-bottom: 15px;
-  "
->
-  🔊 Listen
-</button>
+      </h2>
 
-    
+
+      <!-- Listen -->
+      <button
+        type="button"
+        (click)="speakGerman()"
+        style="
+          padding: 8px 16px;
+          border-radius: 6px;
+          border: 1px solid #aaa;
+          cursor: pointer;
+          margin-bottom: 15px;
+        "
+      >
+        🔊 Listen
+      </button>
+
+
+      <!-- Translation -->
+      <p style="
+        font-size: 18px;
+        margin: 10px 0;
+      ">
+
+        <strong>{{ getSelectedLanguageName() }}:</strong>
+        {{ getWordTranslation() }}
+
+      </p>
+
+
+      <!-- Level / Type -->
+      <p style="
+        margin: 10px 0;
+      ">
+
+        <b>{{ t('wordLevel') }}:</b>
+        {{ word.level }}
+
+        &nbsp; | &nbsp;
+
+        <b>{{ t('wordType') }}:</b>
+        {{ word.partOfSpeech }}
+
+      </p>
+
+
+      <!-- Next Word -->
+      <button
+        (click)="loadWord()"
+        style="
+          margin-top: 12px;
+          padding: 11px 25px;
+          border-radius: 7px;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        "
+      >
+        {{ t('nextWord') }}
+      </button>
 
     </div>
 
 
-    <!-- German → English -->
+
+    <!-- ================================================= -->
+    <!-- 2. GERMAN → ENGLISH -->
+    <!-- ================================================= -->
+
     <div
       *ngIf="mode === 'german'"
       style="
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 18px;
         text-align: center;
-        padding: 20px;
       "
     >
 
-  <h2>
-  {{ uiLanguage === 'de' ? 'Deutsch → Deutsch' :
-     uiLanguage === 'ar' ? 'Deutsch → العربية' :
-     uiLanguage === 'uk' ? 'Deutsch → Українська' :
-     uiLanguage === 'ru' ? 'Deutsch → Русский' :
-     uiLanguage === 'tr' ? 'Deutsch → Türkçe' :
-     'Deutsch → English' }}
-</h2>
+      <!-- German word -->
+      <h2 style="
+        font-size: 34px;
+        margin: 0 0 12px 0;
+      ">
+
+        {{ word.article ? word.article + ' ' : '' }}
+        {{ word.german }}
+
+      </h2>
+
+
+      <!-- Listen -->
+      <button
+        type="button"
+        (click)="speakGerman()"
+        style="
+          padding: 8px 16px;
+          border-radius: 6px;
+          border: 1px solid #aaa;
+          cursor: pointer;
+          margin-bottom: 15px;
+        "
+      >
+        🔊 Listen
+      </button>
+
+
+      <h2 style="
+        margin: 8px 0 15px 0;
+      ">
+
+        {{ uiLanguage === 'de' ? 'Deutsch → Deutsch' :
+           uiLanguage === 'ar' ? 'Deutsch → العربية' :
+           uiLanguage === 'uk' ? 'Deutsch → Українська' :
+           uiLanguage === 'ru' ? 'Deutsch → Русский' :
+           uiLanguage === 'tr' ? 'Deutsch → Türkçe' :
+           'Deutsch → English' }}
+
+      </h2>
+
 
       <input
         [(ngModel)]="userAnswer"
         [placeholder]="
-  uiLanguage === 'de' ? 'Deutsches Wort eingeben' :
-  uiLanguage === 'ar' ? 'اكتب الكلمة' :
-  uiLanguage === 'uk' ? 'Введіть слово' :
-  uiLanguage === 'ru' ? 'Введите слово' :
-  uiLanguage === 'tr' ? 'Kelimeyi yazın' :
-  'Type English word'
-"
+          uiLanguage === 'de' ? 'Deutsches Wort eingeben' :
+          uiLanguage === 'ar' ? 'اكتب الكلمة' :
+          uiLanguage === 'uk' ? 'Введіть слово' :
+          uiLanguage === 'ru' ? 'Введите слово' :
+          uiLanguage === 'tr' ? 'Kelimeyi yazın' :
+          'Type English word'
+        "
         (keyup.enter)="checkAnswer()"
         style="
           padding: 10px;
           width: 250px;
-          max-width: 80%;
+          max-width: 65%;
           border: 1px solid #aaa;
           border-radius: 6px;
           font-size: 16px;
         "
       />
+
 
       <button
         (click)="checkAnswer()"
@@ -260,30 +375,76 @@
         {{ t('check') }}
       </button>
 
-      <p *ngIf="result" style="font-size: 18px;">
+
+      <p
+        *ngIf="result"
+        style="
+          font-size: 18px;
+          margin: 12px 0;
+        "
+      >
         {{ result }}
       </p>
+
 
       <p *ngIf="result">
         <b>{{ t('answer') }}:</b>
         {{ getWordTranslation() }}
       </p>
 
+
+      <!-- Next Word -->
+      <button
+        (click)="loadWord()"
+        style="
+          margin-top: 15px;
+          padding: 11px 25px;
+          border-radius: 7px;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        "
+      >
+        {{ t('nextWord') }}
+      </button>
+
     </div>
 
 
-    <!-- English → German -->
+
+    <!-- ================================================= -->
+    <!-- 3. ENGLISH → GERMAN -->
+    <!-- ================================================= -->
+
     <div
       *ngIf="mode === 'english'"
       style="
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 18px;
         text-align: center;
-        padding: 20px;
       "
     >
 
-      <h2>
-  {{ getSelectedLanguageName() }} → Deutsch
-</h2>
+      <h2 style="
+        margin: 8px 0 15px 0;
+      ">
+
+        {{ getSelectedLanguageName() }} → Deutsch
+
+      </h2>
+
+
+      <!-- Translation/question -->
+      <p style="
+        font-size: 24px;
+        margin: 15px 0;
+      ">
+
+        {{ getWordTranslation() }}
+
+      </p>
+
 
       <input
         [(ngModel)]="userAnswerGerman"
@@ -292,12 +453,13 @@
         style="
           padding: 10px;
           width: 250px;
-          max-width: 80%;
+          max-width: 65%;
           border: 1px solid #aaa;
           border-radius: 6px;
           font-size: 16px;
         "
       />
+
 
       <button
         (click)="checkGermanAnswer()"
@@ -312,33 +474,68 @@
         {{ t('check') }}
       </button>
 
-      <p *ngIf="resultGerman" style="font-size: 18px;">
+
+      <p
+        *ngIf="resultGerman"
+        style="
+          font-size: 18px;
+          margin: 12px 0;
+        "
+      >
         {{ resultGerman }}
       </p>
+
 
       <p *ngIf="resultGerman">
         <b>{{ t('answer') }}:</b>
         {{ word.german }}
       </p>
 
+
+      <!-- Next Word -->
+      <button
+        (click)="loadWord()"
+        style="
+          margin-top: 15px;
+          padding: 11px 25px;
+          border-radius: 7px;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        "
+      >
+        {{ t('nextWord') }}
+      </button>
+
     </div>
 
 
-    <!-- Puzzle -->
+
+    <!-- ================================================= -->
+    <!-- 4. FILL MISSING LETTERS -->
+    <!-- ================================================= -->
+
     <div
       *ngIf="mode === 'puzzle'"
       style="
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 18px;
         text-align: center;
-        padding: 20px;
       "
     >
 
-      <h2>{{ t('puzzle') }}</h2>
+      <h2 style="
+        margin: 8px 0 15px 0;
+      ">
+        {{ t('puzzle') }}
+      </h2>
+
 
       <div style="
         font-size: 28px;
         letter-spacing: 10px;
-        margin: 25px 0;
+        margin: 20px 0;
       ">
 
         <span
@@ -367,6 +564,7 @@
 
       </div>
 
+
       <button
         (click)="checkPuzzle()"
         style="
@@ -379,45 +577,29 @@
         {{ t('checkPuzzle') }}
       </button>
 
-    </div>
 
-      <p style="font-size: 18px; margin: 8px;">
-     <strong>{{ getSelectedLanguageName() }}:</strong>
-       {{ getWordTranslation() }}
-      </p>
+      <!-- Next Word -->
+      <div style="
+        margin-top: 18px;
+      ">
 
-      <p style="margin: 8px;">
+        <button
+          (click)="loadWord()"
+          style="
+            padding: 11px 25px;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+          "
+        >
+          {{ t('nextWord') }}
+        </button>
 
-        <b>{{ t('wordLevel') }}:</b>
-        {{ word.level }}
-
-        &nbsp; | &nbsp;
-
-        <b>{{ t('wordType') }}:</b>
-        {{ word.partOfSpeech }}
-
-      </p>
-
-    <!-- Next word -->
-    <div style="
-      text-align: center;
-      margin-top: 25px;
-    ">
-
-      <button
-        (click)="loadWord()"
-        style="
-          padding: 11px 25px;
-          border-radius: 7px;
-          border: none;
-          cursor: pointer;
-          font-size: 16px;
-        "
-      >
-        {{ t('nextWord') }}
-      </button>
+      </div>
 
     </div>
+
 
   </div>
 

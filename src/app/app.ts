@@ -232,8 +232,7 @@ t(key: string): string {
     || key;
 }
 
-  mode: 'german' | 'english' | 'puzzle' = 'german';
-
+mode: 'vocabulary' | 'german' | 'english' | 'puzzle' = 'vocabulary';
   level: 'B1' | 'B2' = 'B1';
 
   word: any;
