@@ -1,78 +1,423 @@
-<h1>German Learning App</h1>
+<div style="
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+">
 
-<div style="margin-bottom: 15px;">
-  <button (click)="mode='german'">German → English</button>
-  <button (click)="mode='english'">English → German</button>
-  <button (click)="mode='puzzle'">Fill Missing Letters</button>
-</div>
+  <!-- Language menu -->
+  <div style="
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 25px;
+  ">
 
-<p>Score: {{ score }} / {{ total }}</p>
+    <label style="font-weight: 600;">
 
-<hr />
+      {{ t('language') }}:
 
-<!-- Loading -->
-<div *ngIf="loading">
-  <p>Loading word...</p>
-</div>
+      <select
+        [(ngModel)]="uiLanguage"
+        (change)="changeLanguage(uiLanguage)"
+        style="
+          margin-left: 8px;
+          padding: 7px 12px;
+          border-radius: 6px;
+          border: 1px solid #bbb;
+          font-size: 14px;
+        "
+      >
 
-<div *ngIf="!loading && word">
+        <option
+          *ngFor="let language of languages"
+          [value]="language.code">
 
-  <!-- ✅ German → English -->
-  <div *ngIf="mode === 'german'">
+          {{ language.name }}
 
-    <h2>German → English</h2>
+        </option>
 
-    <p><b>{{ word.german }}</b></p>
+      </select>
 
-    <input [(ngModel)]="userAnswer" placeholder="Type English word" />
-    <button (click)="checkAnswer()">Check</button>
-
-    <p *ngIf="result">{{ result }}</p>
-    <p *ngIf="result"><b>Answer:</b> {{ word.english }}</p>
-
-  </div>
-
-  <!-- ✅ English → German -->
-  <div *ngIf="mode === 'english'">
-
-    <h2>English → German</h2>
-
-    <p><b>{{ word.english }}</b></p>
-
-    <input [(ngModel)]="userAnswerGerman" placeholder="Type German word" />
-    <button (click)="checkGermanAnswer()">Check</button>
-
-    <p *ngIf="resultGerman">{{ resultGerman }}</p>
-    <p *ngIf="resultGerman"><b>Answer:</b> {{ word.german }}</p>
+    </label>
 
   </div>
 
-  <!-- ✅ Puzzle -->
-  <div *ngIf="mode === 'puzzle'">
 
-    <h2>Fill Missing Letters</h2>
+  <!-- Title -->
+  <h1 style="
+    text-align: center;
+    margin-bottom: 25px;
+  ">
+    {{ t('title') }}
+  </h1>
 
-    <div style="font-size: 24px; letter-spacing: 10px; margin-bottom: 10px;">
-      <span *ngFor="let letter of displayWord; let i = index">
 
-        <input *ngIf="letter === '_'"
-               maxlength="1"
-               [(ngModel)]="userInputs[i]"
-               style="width:35px;text-align:center;font-size:20px;" />
+  <!-- Level -->
+  <div style="
+    text-align: center;
+    margin-bottom: 20px;
+  ">
 
-        <span *ngIf="letter !== '_'">
-          {{ letter }}
-        </span>
+    <b>{{ t('level') }}:</b>
 
-      </span>
+    <button
+      (click)="changeLevel('B1')"
+      [disabled]="level === 'B1'"
+      style="
+        margin-left: 8px;
+        padding: 8px 18px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        cursor: pointer;
+      "
+    >
+      B1
+    </button>
+
+    <button
+      (click)="changeLevel('B2')"
+      [disabled]="level === 'B2'"
+      style="
+        margin-left: 5px;
+        padding: 8px 18px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        cursor: pointer;
+      "
+    >
+      B2
+    </button>
+
+  </div>
+
+
+  <!-- Learning modes -->
+  <div style="
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  ">
+
+    <button
+      (click)="mode='german'"
+      style="
+        padding: 9px 14px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        cursor: pointer;
+      "
+    >
+      {{ t('germanEnglish') }}
+    </button>
+
+    <button
+      (click)="mode='english'"
+      style="
+        padding: 9px 14px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        cursor: pointer;
+      "
+    >
+      {{ t('englishGerman') }}
+    </button>
+
+    <button
+      (click)="mode='puzzle'"
+      style="
+        padding: 9px 14px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
+        cursor: pointer;
+      "
+    >
+      {{ t('puzzle') }}
+    </button>
+
+  </div>
+
+
+  <!-- Score -->
+  <div style="
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 17px;
+  ">
+
+    <b>{{ t('score') }}:</b>
+    {{ score }} / {{ total }}
+
+  </div>
+
+
+  <!-- Loading -->
+  <div
+    *ngIf="loading"
+    style="
+      text-align: center;
+      padding: 40px;
+    "
+  >
+
+    <p>{{ t('loading') }}</p>
+
+  </div>
+
+
+  <!-- Word area -->
+  <div *ngIf="!loading && word">
+
+
+    <!-- Word card -->
+    <div style="
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      text-align: center;
+    ">
+
+<h2 style="
+  font-size: 34px;
+  margin: 0 0 15px 0;
+">
+
+  {{ word.article ? word.article + ' ' : '' }}
+  {{ word.german }}
+
+</h2>
+
+<button
+  type="button"
+  (click)="speakGerman()"
+  style="
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    margin-bottom: 15px;
+  "
+>
+  🔊 Listen
+</button>
+
+      <p style="font-size: 18px; margin: 8px;">
+     <strong>{{ getSelectedLanguageName() }}:</strong>
+{{ getWordTranslation() }}
+      </p>
+
+      <p style="margin: 8px;">
+
+        <b>{{ t('wordLevel') }}:</b>
+        {{ word.level }}
+
+        &nbsp; | &nbsp;
+
+        <b>{{ t('wordType') }}:</b>
+        {{ word.partOfSpeech }}
+
+      </p>
+
     </div>
 
-    <button (click)="checkPuzzle()">Check Puzzle</button>
+
+    <!-- German → English -->
+    <div
+      *ngIf="mode === 'german'"
+      style="
+        text-align: center;
+        padding: 20px;
+      "
+    >
+
+  <h2>
+  {{ uiLanguage === 'de' ? 'Deutsch → Deutsch' :
+     uiLanguage === 'ar' ? 'Deutsch → العربية' :
+     uiLanguage === 'uk' ? 'Deutsch → Українська' :
+     uiLanguage === 'ru' ? 'Deutsch → Русский' :
+     uiLanguage === 'tr' ? 'Deutsch → Türkçe' :
+     'Deutsch → English' }}
+</h2>
+
+      <input
+        [(ngModel)]="userAnswer"
+        [placeholder]="
+  uiLanguage === 'de' ? 'Deutsches Wort eingeben' :
+  uiLanguage === 'ar' ? 'اكتب الكلمة' :
+  uiLanguage === 'uk' ? 'Введіть слово' :
+  uiLanguage === 'ru' ? 'Введите слово' :
+  uiLanguage === 'tr' ? 'Kelimeyi yazın' :
+  'Type English word'
+"
+        (keyup.enter)="checkAnswer()"
+        style="
+          padding: 10px;
+          width: 250px;
+          max-width: 80%;
+          border: 1px solid #aaa;
+          border-radius: 6px;
+          font-size: 16px;
+        "
+      />
+
+      <button
+        (click)="checkAnswer()"
+        style="
+          margin-left: 8px;
+          padding: 10px 18px;
+          border-radius: 6px;
+          border: 1px solid #aaa;
+          cursor: pointer;
+        "
+      >
+        {{ t('check') }}
+      </button>
+
+      <p *ngIf="result" style="font-size: 18px;">
+        {{ result }}
+      </p>
+
+      <p *ngIf="result">
+        <b>{{ t('answer') }}:</b>
+        {{ getWordTranslation() }}
+      </p>
+
+    </div>
+
+
+    <!-- English → German -->
+    <div
+      *ngIf="mode === 'english'"
+      style="
+        text-align: center;
+        padding: 20px;
+      "
+    >
+
+      <h2>
+  {{ getSelectedLanguageName() }} → Deutsch
+</h2>
+
+      <input
+        [(ngModel)]="userAnswerGerman"
+        [placeholder]="t('typeGerman')"
+        (keyup.enter)="checkGermanAnswer()"
+        style="
+          padding: 10px;
+          width: 250px;
+          max-width: 80%;
+          border: 1px solid #aaa;
+          border-radius: 6px;
+          font-size: 16px;
+        "
+      />
+
+      <button
+        (click)="checkGermanAnswer()"
+        style="
+          margin-left: 8px;
+          padding: 10px 18px;
+          border-radius: 6px;
+          border: 1px solid #aaa;
+          cursor: pointer;
+        "
+      >
+        {{ t('check') }}
+      </button>
+
+      <p *ngIf="resultGerman" style="font-size: 18px;">
+        {{ resultGerman }}
+      </p>
+
+      <p *ngIf="resultGerman">
+        <b>{{ t('answer') }}:</b>
+        {{ word.german }}
+      </p>
+
+    </div>
+
+
+    <!-- Puzzle -->
+    <div
+      *ngIf="mode === 'puzzle'"
+      style="
+        text-align: center;
+        padding: 20px;
+      "
+    >
+
+      <h2>{{ t('puzzle') }}</h2>
+
+      <div style="
+        font-size: 28px;
+        letter-spacing: 10px;
+        margin: 25px 0;
+      ">
+
+        <span
+          *ngFor="let letter of displayWord; let i = index"
+        >
+
+          <input
+            *ngIf="letter === '_'"
+            maxlength="1"
+            [(ngModel)]="userInputs[i]"
+            style="
+              width: 40px;
+              height: 40px;
+              text-align: center;
+              font-size: 24px;
+              border: 1px solid #aaa;
+              border-radius: 6px;
+            "
+          />
+
+          <span *ngIf="letter !== '_'">
+            {{ letter }}
+          </span>
+
+        </span>
+
+      </div>
+
+      <button
+        (click)="checkPuzzle()"
+        style="
+          padding: 10px 20px;
+          border-radius: 6px;
+          border: 1px solid #aaa;
+          cursor: pointer;
+        "
+      >
+        {{ t('checkPuzzle') }}
+      </button>
+
+    </div>
+
+
+    <!-- Next word -->
+    <div style="
+      text-align: center;
+      margin-top: 25px;
+    ">
+
+      <button
+        (click)="loadWord()"
+        style="
+          padding: 11px 25px;
+          border-radius: 7px;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        "
+      >
+        {{ t('nextWord') }}
+      </button>
+
+    </div>
 
   </div>
-
-  <hr />
-
-  <button (click)="loadWord()">Next Word</button>
 
 </div>
