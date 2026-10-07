@@ -18,7 +18,7 @@ export class App {
     { code: 'de', name: 'Deutsch' },
     { code: 'ar', name: 'العربية' },
     { code: 'uk', name: 'Українська' },
-    { code: 'ru', name: 'Русский' },
+    { code: 'fa', name: 'دری' },
     { code: 'tr', name: 'Türkçe' }
   ];
 
@@ -96,24 +96,34 @@ send: 'Надіслати',
 speak: 'Говорити',
 stop: 'Зупинити'
     },
-    ru: {
-      title: 'Приложение для изучения немецкого', language: 'Язык',
-      germanVocabulary: 'Немецкая лексика', puzzle: 'Заполнить пропущенные буквы',
-      search: 'Поиск', searchPlaceholder: 'Поиск немецкого слова',
-      listen: 'Слушать', translation: 'Перевод', meanings: 'Значения',
-      wordType: 'Часть речи', article: 'Артикль', plural: 'Множественное число',
-      examples: 'Примеры', verbForms: 'Формы глагола', level: 'Уровень',
-      previousWord: 'Назад', nextWord: 'Далее', checkPuzzle: 'Проверить',
-      correct: 'Правильно!', tryAgain: 'Попробуйте ещё раз', loading: 'Загрузка...',
-      noWordFound: 'Слово не найдено.', failedSearch: 'Ошибка поиска.',
-      infinitive: 'Инфинитив', preterite: 'Прошедшее', perfect: 'Perfekt',
-      chat: 'Чат',
-chatSuggestion: 'Спрашивайте о немецком языке, переводах, грамматике или просто общайтесь.',
-chatPlaceholder: 'Спросите что угодно...',
-send: 'Отправить',
-speak: 'Говорить',
-stop: 'Остановить'
-    },
+fa: {
+  title: 'برنامه یادگیری زبان آلمانی',
+  language: 'زبان',
+  germanVocabulary: 'واژگان آلمانی',
+  puzzle: 'حروف گمشده را کامل کنید',
+  search: 'جستجو',
+  searchPlaceholder: 'یک کلمه آلمانی جستجو کنید',
+  listen: 'گوش دادن',
+  translation: 'ترجمه',
+  meanings: 'معانی',
+  wordType: 'نوع کلمه',
+  article: 'آرتیکل',
+  plural: 'جمع',
+  examples: 'مثال‌ها',
+  verbForms: 'شکل‌های فعل',
+  level: 'سطح',
+  previousWord: 'قبلی',
+  nextWord: 'بعدی',
+  checkPuzzle: 'بررسی',
+  correct: 'درست!',
+  tryAgain: 'دوباره تلاش کنید',
+  loading: 'در حال بارگذاری...',
+  noWordFound: 'کلمه پیدا نشد.',
+  failedSearch: 'جستجو ناموفق بود.',
+  infinitive: 'مصدر',
+  preterite: 'گذشته ساده',
+  perfect: 'Perfekt'
+},
     tr: {
       title: 'Almanca Öğrenme Uygulaması', language: 'Dil',
       germanVocabulary: 'Almanca Kelime Bilgisi', puzzle: 'Eksik Harfleri Doldur',
@@ -373,11 +383,19 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
     };
   }
 
-  getSelectedLanguageName(): string {
-    return this.languages.find(x => x.code === this.uiLanguage)?.name || 'English';
+getSelectedLanguageName(): string {
+  switch (this.uiLanguage) {
+    case 'de': return 'German';
+    case 'uk': return 'Ukrainian';
+    case 'tr': return 'Turkish';
+    case 'ar': return 'Arabic';
+    case 'fa': return 'Dari';
+    case 'en':
+    default: return 'English';
   }
+}
 
-  startSpeaking() {
+ startSpeaking() {
   const SpeechRecognition =
     (window as any).SpeechRecognition ||
     (window as any).webkitSpeechRecognition;
@@ -387,17 +405,26 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
     return;
   }
 
+  // Stop any previous recognition session
+  if (this.recognition) {
+    try {
+      this.recognition.stop();
+    } catch {}
+  }
+
   this.recognition = new SpeechRecognition();
 
   this.recognition.lang = this.getSpeechLanguage();
   this.recognition.continuous = true;
   this.recognition.interimResults = true;
 
+  // IMPORTANT: every new speech session starts fresh
   let finalTranscript = '';
+
+  this.chatInput = '';
 
   this.recognition.onstart = () => {
     this.isListening = true;
-    finalTranscript = this.chatInput.trim();
     this.cd.detectChanges();
   };
 
@@ -405,8 +432,12 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
 
     let interimTranscript = '';
 
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-
+    // Only process the results that changed
+    for (
+      let i = event.resultIndex;
+      i < event.results.length;
+      i++
+    ) {
       const transcript =
         event.results[i][0].transcript;
 
@@ -425,6 +456,7 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
 
   this.recognition.onerror = (event: any) => {
     console.error('Speech recognition error:', event);
+
     this.isListening = false;
     this.cd.detectChanges();
   };
