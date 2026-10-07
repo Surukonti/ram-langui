@@ -71,58 +71,85 @@
         {{ word.article ? word.article + ' ' : '' }}{{ word.german }}
       </div>
 
-      <button
-        (click)="speakGerman(word.german)"
-        style="padding:8px 16px;border-radius:6px;border:1px solid #aaa;"
-      >
+      <button (click)="speakGerman(word.german)"
+              style="padding:8px 16px;border-radius:6px;border:1px solid #aaa;">
         🔊 {{ t('listen') }}
       </button>
 
       <p style="font-size:18px;margin:18px 0;">
         <strong>{{ t('translation') }}:</strong>
-        {{ word.english || word.translation || '—' }}
+        {{ word.translation || '—' }}
       </p>
+
+      <div *ngIf="word.meanings?.length" style="margin-top:15px;text-align:left;">
+        <h3>{{ t('meanings') }}</h3>
+        <ul>
+          <li *ngFor="let meaning of word.meanings">{{ meaning }}</li>
+        </ul>
+      </div>
 
       <p>
         <strong>{{ t('level') }}:</strong> B2
         &nbsp; | &nbsp;
-        <strong>{{ t('wordType') }}:</strong> {{ word.partOfSpeech || '—' }}
+        <strong>{{ t('wordType') }}:</strong> {{ word.wordType || '—' }}
       </p>
 
-      <div
-        *ngIf="word.present || word.preterite || word.perfect"
-        style="margin-top:15px;padding-top:12px;border-top:1px solid #eee;"
-      >
-        <p *ngIf="word.present">
-          <strong>Präsens:</strong> {{ word.present }}
+      <p *ngIf="word.article">
+        <strong>{{ t('article') }}:</strong> {{ word.article }}
+        <span *ngIf="word.plural">&nbsp; | &nbsp;
+          <strong>{{ t('plural') }}:</strong> {{ word.plural }}
+        </span>
+      </p>
+
+      <div *ngIf="word.verbForms" style="margin-top:18px;text-align:left;">
+        <h3>{{ t('verbForms') }}</h3>
+
+        <p *ngIf="word.verbForms.infinitiveGerman">
+          <strong>{{ t('infinitive') }}:</strong>
+          {{ word.verbForms.infinitiveGerman }}
+          <span *ngIf="word.verbForms.infinitiveTranslation">
+            — {{ word.verbForms.infinitiveTranslation }}
+          </span>
         </p>
 
-        <p *ngIf="word.preterite">
-          <strong>Präteritum:</strong> {{ word.preterite }}
+        <p *ngIf="word.verbForms.praeteritumGerman">
+          <strong>{{ t('preterite') }}:</strong>
+          {{ word.verbForms.praeteritumGerman }}
+          <span *ngIf="word.verbForms.praeteritumTranslation">
+            — {{ word.verbForms.praeteritumTranslation }}
+          </span>
         </p>
 
-        <p *ngIf="word.perfect">
-          <strong>Perfekt:</strong> {{ word.perfect }}
+        <p *ngIf="word.verbForms.perfektGerman">
+          <strong>{{ t('perfect') }}:</strong>
+          {{ word.verbForms.perfektGerman }}
+          <span *ngIf="word.verbForms.perfektTranslation">
+            — {{ word.verbForms.perfektTranslation }}
+          </span>
         </p>
       </div>
 
-      <div style="display:flex;justify-content:center;gap:10px;margin-top:22px;">
+      <div *ngIf="word.examples?.length" style="margin-top:18px;text-align:left;">
+        <h3>{{ t('examples') }}</h3>
 
-        <button
-          (click)="previousVocabulary()"
-          [disabled]="vocabularyIndex <= 0"
-          style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
-        >
+        <div *ngFor="let example of word.examples"
+             style="margin-bottom:12px;padding:10px;border-left:3px solid #ddd;">
+          <div><strong>{{ example.german }}</strong></div>
+          <div>{{ example.translation }}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:22px;">
+        <button (click)="previousVocabulary()"
+                [disabled]="vocabularyIndex <= 0"
+                style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;">
           ← {{ t('previousWord') }}
         </button>
 
-        <button
-          (click)="nextVocabulary()"
-          style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
-        >
+        <button (click)="nextVocabulary()"
+                style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;">
           {{ t('nextWord') }} →
         </button>
-
       </div>
     </div>
   </div>
@@ -143,29 +170,17 @@
       <h2>{{ t('puzzle') }}</h2>
 
       <div style="font-size:30px;letter-spacing:8px;margin:25px 0;">
-
         <ng-container *ngFor="let letter of displayWord; let i=index">
-
-          <input
-            *ngIf="letter === '_'"
-            maxlength="1"
-            [(ngModel)]="userInputs[i]"
-            style="width:40px;height:40px;text-align:center;font-size:24px;
-                   border:1px solid #aaa;border-radius:6px;margin:2px;"
-          />
-
-          <span *ngIf="letter !== '_'">
-            {{ letter }}
-          </span>
-
+          <input *ngIf="letter === '_'" maxlength="1"
+                 [(ngModel)]="userInputs[i]"
+                 style="width:40px;height:40px;text-align:center;font-size:24px;
+                        border:1px solid #aaa;border-radius:6px;margin:2px;" />
+          <span *ngIf="letter !== '_'">{{ letter }}</span>
         </ng-container>
-
       </div>
 
-      <button
-        (click)="checkPuzzle()"
-        style="padding:10px 20px;border-radius:6px;border:1px solid #aaa;"
-      >
+      <button (click)="checkPuzzle()"
+              style="padding:10px 20px;border-radius:6px;border:1px solid #aaa;">
         {{ t('checkPuzzle') }}
       </button>
 
@@ -173,23 +188,77 @@
         {{ puzzleResult }}
       </p>
 
-      <div style="display:flex;justify-content:center;gap:10px;margin-top:22px;">
+      <!-- Full correction shown only after a wrong answer -->
+      <div *ngIf="puzzleInfo"
+           style="margin-top:20px;padding:18px;border-top:1px solid #eee;text-align:left;">
 
-        <button
-          (click)="previousPuzzle()"
-          [disabled]="puzzleIndex <= 0"
-          style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
-        >
+        <h2 style="text-align:center;">
+          {{ puzzleInfo.germanWord }}
+        </h2>
+
+        <p>
+          <strong>{{ t('translation') }}:</strong>
+          {{ puzzleInfo.translation }}
+        </p>
+
+        <div *ngIf="puzzleInfo.meanings?.length">
+          <h3>{{ t('meanings') }}</h3>
+          <ul>
+            <li *ngFor="let meaning of puzzleInfo.meanings">{{ meaning }}</li>
+          </ul>
+        </div>
+
+        <p>
+          <strong>{{ t('wordType') }}:</strong>
+          {{ puzzleInfo.wordType || '—' }}
+        </p>
+
+        <p *ngIf="puzzleInfo.article">
+          <strong>{{ t('article') }}:</strong> {{ puzzleInfo.article }}
+          <span *ngIf="puzzleInfo.plural">
+            &nbsp; | &nbsp;<strong>{{ t('plural') }}:</strong> {{ puzzleInfo.plural }}
+          </span>
+        </p>
+
+        <div *ngIf="puzzleInfo.verbForms">
+          <h3>{{ t('verbForms') }}</h3>
+          <p *ngIf="puzzleInfo.verbForms.infinitiveGerman">
+            <strong>{{ t('infinitive') }}:</strong>
+            {{ puzzleInfo.verbForms.infinitiveGerman }}
+            — {{ puzzleInfo.verbForms.infinitiveTranslation }}
+          </p>
+          <p *ngIf="puzzleInfo.verbForms.praeteritumGerman">
+            <strong>{{ t('preterite') }}:</strong>
+            {{ puzzleInfo.verbForms.praeteritumGerman }}
+            — {{ puzzleInfo.verbForms.praeteritumTranslation }}
+          </p>
+          <p *ngIf="puzzleInfo.verbForms.perfektGerman">
+            <strong>{{ t('perfect') }}:</strong>
+            {{ puzzleInfo.verbForms.perfektGerman }}
+            — {{ puzzleInfo.verbForms.perfektTranslation }}
+          </p>
+        </div>
+
+        <div *ngIf="puzzleInfo.examples?.length">
+          <h3>{{ t('examples') }}</h3>
+          <div *ngFor="let example of puzzleInfo.examples"
+               style="margin-bottom:12px;padding:10px;border-left:3px solid #ddd;">
+            <div><strong>{{ example.german }}</strong></div>
+            <div>{{ example.translation }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:22px;">
+        <button (click)="previousPuzzle()" [disabled]="puzzleIndex <= 0"
+                style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;">
           ← {{ t('previousWord') }}
         </button>
 
-        <button
-          (click)="nextPuzzle()"
-          style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
-        >
+        <button (click)="nextPuzzle()"
+                style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;">
           {{ t('nextWord') }} →
         </button>
-
       </div>
     </div>
   </div>

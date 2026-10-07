@@ -159,6 +159,8 @@ stop: 'Durdur'
   displayWord: string[] = [];
   userInputs: string[] = [];
   puzzleResult = '';
+  puzzleInfo: any = null;
+  private wordInfoCache = new Map<string, any>();
 
   searchText = '';
   searchLoading = false;
@@ -188,6 +190,15 @@ private recognition: any;
 
   changeLanguage(language: string) {
     this.uiLanguage = language;
+
+    // Reuse cached AI data when possible; otherwise translate the current word once.
+    if (this.word?.german) {
+      this.loadAiWord(this.word.german, false);
+    }
+
+    if (this.mode === 'puzzle' && this.puzzleResult && this.puzzleWord) {
+      this.loadAiWord(this.puzzleWord, true);
+    }
   }
 
 selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
@@ -205,6 +216,51 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
     }
   }
 
+  private loadAiWord(germanWord: string, puzzle = false) {
+  const language = this.getSelectedLanguageName();
+  const key = germanWord.trim().toLowerCase() + '|' + language;
+
+  const cached = this.wordInfoCache.get(key);
+
+  if (cached) {
+    if (puzzle) {
+      this.puzzleInfo = cached;
+    } else {
+      this.word = { ...this.word, ...cached, german: germanWord };
+    }
+
+    this.cd.detectChanges();
+    return;
+  }
+
+  this.http.post<any>(`${environment.apiUrl}/api/ai/word`, {
+    germanWord,
+    targetLanguage: language
+  }).subscribe({
+    next: result => {
+      const info = {
+        ...result,
+        german: result.germanWord || germanWord,
+        meanings: Array.isArray(result.meanings) ? result.meanings : []
+      };
+
+      this.wordInfoCache.set(key, info);
+
+      if (puzzle) {
+        this.puzzleInfo = info;
+      } else {
+        this.word = { ...this.word, ...info, german: germanWord };
+      }
+
+      this.cd.detectChanges();
+    },
+    error: err => {
+      console.error('AI word information error:', err);
+      this.cd.detectChanges();
+    }
+  });
+}
+
   loadVocabulary() {
     this.loading = true;
     this.http.get<any>(`${environment.apiUrl}/api/random/vocabulary`).subscribe({
@@ -212,6 +268,7 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
         this.word = word;
         this.vocabularyHistory = [word];
         this.vocabularyIndex = 0;
+        this.loadAiWord(word.german);
         this.loading = false;
         this.cd.detectChanges();
       },
@@ -236,6 +293,7 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
         this.vocabularyHistory.push(word);
         this.vocabularyIndex++;
         this.word = word;
+        this.loadAiWord(word.german);
         this.loading = false;
         this.cd.detectChanges();
       },
@@ -251,6 +309,7 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
     if (this.vocabularyIndex <= 0) return;
     this.vocabularyIndex--;
     this.word = this.vocabularyHistory[this.vocabularyIndex];
+    this.loadAiWord(this.word.german);
   }
 
   loadPuzzle() {
@@ -303,6 +362,7 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
 
   setPuzzleWord(german: string) {
     this.puzzleWord = german;
+    this.puzzleInfo = null;
     const chars = german.split('');
     this.userInputs = new Array(chars.length).fill('');
     this.puzzleResult = '';
@@ -333,10 +393,15 @@ selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
         : this.displayWord[i];
     }
 
-    this.puzzleResult =
-      answer.toLowerCase() === this.puzzleWord.toLowerCase()
-        ? this.t('correct')
-        : this.t('tryAgain');
+    if (answer.toLowerCase() === this.puzzleWord.toLowerCase()) {
+      this.puzzleResult = this.t('correct');
+      this.puzzleInfo = null;
+    } else {
+      this.puzzleResult = this.t('tryAgain');
+      this.loadAiWord(this.puzzleWord, true);
+    }
+
+    this.cd.detectChanges();
   }
 
   searchWord() {
