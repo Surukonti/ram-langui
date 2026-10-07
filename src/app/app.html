@@ -52,6 +52,14 @@
       💬 Chat
     </button>
 
+    <button
+  type="button"
+  (click)="mode = 'dtb'"
+  [disabled]="mode === 'dtb'"
+>
+  🇩🇪 DTB B2
+</button>
+
   </div>
 
 
@@ -515,9 +523,124 @@
   ⏹ Stop
 </button>
 
-      </div>
+       </div>
+    </div>
 
     </div>
-  </div>
 
+    <!-- ================================================= -->
+    <!-- DTB B2 -->
+  <div *ngIf="mode === 'dtb'">
+    <div style="border:1px solid #ddd;border-radius:12px;padding:20px;margin-top:10px;">
+      <h2 style="text-align:center;">🇩🇪 Deutsch-Test für den Beruf B2</h2>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0;">
+        <button *ngFor="let section of dtbSections"
+                type="button"
+                (click)="selectedDtbSection = section.id"
+                [disabled]="selectedDtbSection === section.id"
+                style="padding:9px 13px;border-radius:6px;border:1px solid #aaa;">
+          {{ section.title }}
+        </button>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'overview'">
+        <h3>Deutsch-Test für den Beruf B2</h3>
+        <p>Dieser Bereich ist für die Vorbereitung auf den DTB B2 gedacht.</p>
+        <ul>
+          <li>Lesen</li>
+          <li>Lesen und Schreiben</li>
+          <li>Hören</li>
+          <li>Hören und Schreiben</li>
+          <li>Sprachbausteine</li>
+          <li>Schreiben</li>
+          <li>Sprechen</li>
+        </ul>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'lesen'">
+        <h3>📖 Lesen</h3>
+        <p>Trainiere berufliche Texte, Informationen, Anweisungen, Regeln und Arbeitsabläufe.</p>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'lesen-schreiben'">
+        <h3>📝 Lesen & Schreiben</h3>
+        <p>Informationen aus beruflichen Texten aufnehmen und schriftlich angemessen darauf reagieren.</p>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'hoeren'">
+        <h3>🎧 Hören</h3>
+        <p>Trainiere berufliche Gespräche, Ansagen, Argumentationen und wichtige Informationen.</p>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'hoeren-schreiben'">
+        <h3>🎧📝 Hören & Schreiben</h3>
+        <p>Wichtige Informationen aus beruflichen Gesprächen aufnehmen und schriftlich dokumentieren.</p>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'sprachbausteine'">
+        <h3>🔤 Sprachbausteine</h3>
+        <p>Übe typische sprachliche Mittel für die berufliche Kommunikation.</p>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'schreiben'">
+        <h3>✍️ Schreiben – {{ dtbExercises.length }} Übungen</h3>
+        <p>Jede Aufgabe ist für mindestens 120 Wörter ausgelegt und enthält eine Modellantwort.</p>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0;">
+          <button type="button" (click)="previousDtbExercise()"
+                  style="padding:10px 16px;border-radius:6px;border:1px solid #aaa;">
+            ← Vorherige
+          </button>
+          <strong>Übung {{ selectedDtbExercise + 1 }} / {{ dtbExercises.length }}</strong>
+          <button type="button" (click)="nextDtbExercise()"
+                  style="padding:10px 16px;border-radius:6px;border:1px solid #aaa;">
+            Nächste →
+          </button>
+        </div>
+
+        <div style="border:1px solid #ddd;border-radius:10px;padding:18px;">
+          <h3>{{ selectedDtbExerciseData.title }}</h3>
+          <h4>Aufgabe</h4>
+          <p>{{ selectedDtbExerciseData.task }}</p>
+
+          <h4>Deine Antwort</h4>
+          <textarea rows="10"
+                    placeholder="Schreibe hier deinen Text..."
+                    style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #aaa;border-radius:6px;font-size:16px;"></textarea>
+
+          <div style="margin-top:14px;">
+            <button type="button" (click)="toggleDtbAnswer()"
+                    style="padding:10px 16px;border-radius:6px;border:1px solid #aaa;">
+              {{ dtbShowAnswer ? 'Modellantwort ausblenden' : 'Modellantwort anzeigen' }}
+            </button>
+          </div>
+
+          <div *ngIf="dtbShowAnswer" style="margin-top:18px;">
+            <h4>Modellantwort</h4>
+            <p>{{ selectedDtbExerciseData.modelAnswer }}</p>
+
+            <h4>Nützliche B2-Formulierungen</h4>
+            <ul>
+              <li *ngFor="let phrase of selectedDtbExerciseData.usefulPhrases">
+                {{ phrase }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="selectedDtbSection === 'sprechen'">
+        <h3>🗣️ Sprechen</h3>
+        <ul>
+          <li>ein berufliches Thema beschreiben</li>
+          <li>Meinungen und Erfahrungen ausdrücken</li>
+          <li>auf Rückfragen reagieren</li>
+          <li>Vorschläge machen</li>
+          <li>Argumente austauschen</li>
+          <li>gemeinsam Lösungen finden</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>

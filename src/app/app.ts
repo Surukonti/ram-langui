@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../environments/environment';
-
+import { DTB_SECTIONS, SCHREIBEN_EXERCISES } from './dtb-data';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -144,8 +144,7 @@ stop: 'Durdur'
     }
   };
 
- mode: 'vocabulary' | 'puzzle' | 'search' | 'chat' = 'vocabulary';
-
+mode: 'vocabulary' | 'puzzle' | 'search' | 'chat' | 'dtb' = 'vocabulary';
   word: any = null;
   loading = false;
 
@@ -167,6 +166,39 @@ stop: 'Durdur'
   searchResult: any = null;
   searchError = '';
 
+  dtbSections = DTB_SECTIONS;
+selectedDtbSection = 'overview';
+dtbExercises = SCHREIBEN_EXERCISES;
+selectedDtbExercise = 0;
+dtbShowAnswer = false;
+
+get selectedDtbExerciseData() {
+  return this.dtbExercises[this.selectedDtbExercise];
+}
+
+previousDtbExercise() {
+  this.selectedDtbExercise =
+    this.selectedDtbExercise > 0
+      ? this.selectedDtbExercise - 1
+      : this.dtbExercises.length - 1;
+
+  this.dtbShowAnswer = false;
+}
+
+nextDtbExercise() {
+  this.selectedDtbExercise =
+    this.selectedDtbExercise < this.dtbExercises.length - 1
+      ? this.selectedDtbExercise + 1
+      : 0;
+
+  this.dtbShowAnswer = false;
+}
+
+toggleDtbAnswer() {
+  this.dtbShowAnswer = !this.dtbShowAnswer;
+}
+
+
   chatInput = '';
 chatMessages: { role: 'user' | 'assistant'; text: string }[] = [];
 chatLoading = false;
@@ -181,6 +213,7 @@ private recognition: any;
   ) {
     this.loadVocabulary();
   }
+
 
   t(key: string): string {
     return this.translations[this.uiLanguage]?.[key]
@@ -201,7 +234,7 @@ private recognition: any;
     }
   }
 
-selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat') {
+selectMode(mode: 'vocabulary' | 'puzzle' | 'search' | 'chat' | 'dtb') {
     this.mode = mode;
     this.loading = false;
     this.searchError = '';
