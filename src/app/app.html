@@ -528,6 +528,21 @@
         </button>
 
         <input
+  #cameraInput
+  type="file"
+  accept="image/*"
+  capture="environment"
+  (change)="onImagesSelected($event)"
+  style="display:none;"
+/>
+<button
+  type="button"
+  (click)="cameraInput.click()"
+>
+  📸 Foto aufnehmen
+</button>
+
+        <input
           type="text"
           [(ngModel)]="chatInput"
           (keyup.enter)="sendChatMessage()"
