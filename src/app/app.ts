@@ -11,7 +11,7 @@ import { DTB_SECTIONS, SCHREIBEN_EXERCISES } from './dtb-data';
   templateUrl: './app.html'
 })
 export class App {
-  uiLanguage = 'en';
+  uiLanguage = 'de';
 
   languages = [
     { code: 'en', name: 'English' },
@@ -198,10 +198,12 @@ toggleDtbAnswer() {
   this.dtbShowAnswer = !this.dtbShowAnswer;
 }
 
-
   chatInput = '';
 chatMessages: { role: 'user' | 'assistant'; text: string }[] = [];
 chatLoading = false;
+
+  selectedImages: File[] = [];
+  imagePreviews: string[] = [];
 
 isListening = false;
 spokenText = '';
@@ -213,7 +215,6 @@ private recognition: any;
   ) {
     this.loadVocabulary();
   }
-
 
   t(key: string): string {
     return this.translations[this.uiLanguage]?.[key]
@@ -590,34 +591,77 @@ getSpeechLanguage(): string {
   }
 }
 
-sendChatMessage() {
+onImagesSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files) return;
+
+  const newImages = Array.from(input.files).filter(file =>
+    file.type.startsWith('image/')
+  );
+
+  this.selectedImages.push(...newImages);
+  this.imagePreviews.push(...newImages.map(file => URL.createObjectURL(file)));
+
+  input.value = '';
+  this.cd.detectChanges();
+}
+
+removeSelectedImage(index: number) {
+  URL.revokeObjectURL(this.imagePreviews[index]);
+  this.selectedImages.splice(index, 1);
+  this.imagePreviews.splice(index, 1);
+  this.cd.detectChanges();
+}
+
+  sendChatMessage() {
   const message = this.chatInput.trim();
 
-  if (!message || this.chatLoading) {
+  if ((!message && this.selectedImages.length === 0) || this.chatLoading) {
     return;
   }
 
   this.chatMessages.push({
     role: 'user',
-    text: message
+    text: message || '[Image]'
   });
 
   this.chatInput = '';
   this.chatLoading = true;
 
-  this.http.post<any>(`${environment.apiUrl}/api/ai/chat`, {
-    message,
-    language: this.getSelectedLanguageName()
-  }).subscribe({
+  const formData = new FormData();
+
+  formData.append('message', message);
+  formData.append('language', this.getSelectedLanguageName());
+
+  this.selectedImages.forEach(image => {
+    formData.append('images', image);
+  });
+
+  this.http.post<any>(
+    `${environment.apiUrl}/api/ai/chat`,
+    formData
+  ).subscribe({
     next: (result) => {
+
       this.chatMessages.push({
         role: 'assistant',
         text: result.response
       });
 
+      // Clear selected images after successful send
+      this.selectedImages.forEach((_, index) => {
+        if (this.imagePreviews[index]) {
+          URL.revokeObjectURL(this.imagePreviews[index]);
+        }
+      });
+
+      this.selectedImages = [];
+      this.imagePreviews = [];
+
       this.chatLoading = false;
       this.cd.detectChanges();
     },
+
     error: (error) => {
       console.error('Chat error:', error);
 

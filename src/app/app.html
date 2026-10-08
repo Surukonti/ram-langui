@@ -473,6 +473,29 @@
       </div>
 
 
+      <!-- Selected images -->
+      <div
+        *ngIf="imagePreviews.length"
+        style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;"
+      >
+        <div
+          *ngFor="let preview of imagePreviews; let i = index"
+          style="position:relative;"
+        >
+          <img
+            [src]="preview"
+            style="width:100px;height:100px;object-fit:cover;border:1px solid #ccc;border-radius:8px;"
+          />
+          <button
+            type="button"
+            (click)="removeSelectedImage(i)"
+            style="position:absolute;top:3px;right:3px;width:24px;height:24px;border:0;border-radius:50%;cursor:pointer;"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+
       <!-- Loading -->
       <div
         *ngIf="chatLoading"
@@ -488,6 +511,23 @@
       >
 
         <input
+          #imageInput
+          type="file"
+          accept="image/*"
+          multiple
+          (change)="onImagesSelected($event)"
+          style="display:none;"
+        />
+
+        <button
+          type="button"
+          (click)="imageInput.click()"
+          style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
+        >
+          📷 Bilder hinzufügen
+        </button>
+
+        <input
           type="text"
           [(ngModel)]="chatInput"
           (keyup.enter)="sendChatMessage()"
@@ -499,7 +539,7 @@
         <button
           type="button"
           (click)="sendChatMessage()"
-          [disabled]="chatLoading || !chatInput.trim()"
+         [disabled]="chatLoading || (!chatInput.trim() && selectedImages.length === 0)"
           style="padding:10px 18px;border-radius:6px;border:1px solid #aaa;"
         >
           {{ chatLoading ? 'Thinking...' : 'Send' }}
